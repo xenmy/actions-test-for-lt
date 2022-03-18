@@ -1,0 +1,20 @@
+name: ruby-on-nix
+on:
+  workflow_dispatch:
+jobs:
+  ruby-on-nix:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: cachix/install-nix-action@v15
+      with:
+        nix_path: nixpkgs=channel:nixos-21.11
+    - name: Generate gemset.nix
+      run: |
+        cd .github/workflows/scripts/ruby-on-nix
+        nix-shell -p 'bundix' --run 'bundix'
+    - run: |
+        cd .github/workflows/scripts/ruby-on-nix
+        nix-shell --run "./ruby-on-nix.rb"
+      env:
+        API_TOKEN: ${{ secrets.API_TOKEN }}

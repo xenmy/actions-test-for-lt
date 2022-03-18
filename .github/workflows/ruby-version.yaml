@@ -1,0 +1,26 @@
+name: ruby-version
+on:
+  workflow_dispatch:
+jobs:
+  ruby-version:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: cachix/install-nix-action@v15
+      with:
+        nix_path: nixpkgs=channel:nixos-21.11
+    - name: Ruby (Runner Default)
+      run: ruby --version
+    - name: Ruby (nixos-21.11 Default)
+      run: |
+        cd .github/workflows/scripts/ruby-version
+        nix-shell --run "bundle lock" -p bundler
+        nix-shell --run "bundix" -p bundix
+        nix-shell --run "ruby --version" ./ruby.nix
+    - name: Ruby (nixos-21.11 3.0.x)
+      run: |
+        cd .github/workflows/scripts/ruby-version
+        rm gemset.nix
+        nix-shell --run "bundle lock" ./bundler_3_0.nix
+        nix-shell --run "bundix" -p bundix
+        nix-shell --run "ruby --version" ./ruby_3_0.nix
